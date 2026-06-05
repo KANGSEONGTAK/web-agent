@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>Generic Form Test (standard controls)</title>
+<style>
+  body { font-family: sans-serif; max-width: 640px; margin: 40px auto; }
+  .form-row { margin-bottom: 18px; }
+  .form-label { display:block; font-weight:600; margin-bottom:6px; }
+  input[type=text], textarea, select { width:100%; padding:8px; box-sizing:border-box; }
+  .na-row { display:flex; align-items:center; gap:6px; }
+</style>
+</head>
+<body>
+<h1>표준 HTML 폼 (다른 양식 호환성 테스트)</h1>
+<form id="generic-form">
+  <div class="form-row">
+    <label class="form-label" for="name">이름</label>
+    <input type="text" id="name" placeholder="이름 입력">
+  </div>
+  <div class="form-row">
+    <label class="form-label" for="email">이메일</label>
+    <input type="text" id="email" placeholder="email">
+  </div>
+  <div class="form-row">
+    <label class="form-label" for="intro">자기소개</label>
+    <textarea id="intro" rows="3" placeholder="자기소개"></textarea>
+  </div>
+  <div class="form-row">
+    <label class="form-label" for="gender">성별</label>
+    <select id="gender">
+      <option value="">선택</option>
+      <option value="male">남</option>
+      <option value="female">여</option>
+    </select>
+  </div>
+  <div class="form-row">
+    <label class="form-label" for="birth">생년월일</label>
+    <input type="date" id="birth">
+  </div>
+  <div class="form-row">
+    <label class="form-label">어학</label>
+    <div class="na-row">
+      <label><input type="checkbox" id="lang-na"> 해당없음</label>
+    </div>
+  </div>
+</form>
+</body>
+</html>

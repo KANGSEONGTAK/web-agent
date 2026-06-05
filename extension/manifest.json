@@ -1,0 +1,22 @@
+{
+  "manifest_version": 3,
+  "name": "AI 지원서 작성 도우미",
+  "version": "1.0.0",
+  "description": "AI 기반 지원서 자동 작성 - 포트폴리오 관리, 자기소개서 작성, 합격률 팁",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage",
+    "sidePanel"
+  ],
+  "host_permissions": [
+    "http://localhost:5000/*",
+    "<all_urls>"
+  ],
+  "side_panel": {
+    "default_path": "sidepanel.html"
+  },
+  "background": {
+    "service_worker": "background.js"
+  }
+}

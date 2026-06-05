@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>채용 지원서 - 테스트</title>
+    <style>
+        body { font-family: 'Malgun Gothic', sans-serif; max-width: 700px; margin: 40px auto; padding: 20px; }
+        fieldset { border: 1px solid #ccc; padding: 20px; margin-bottom: 20px; border-radius: 8px; }
+        legend { font-weight: bold; padding: 0 10px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input[type="text"], input[type="email"], input[type="tel"], input[type="date"], select, textarea {
+            width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;
+        }
+        .checkbox-group label { display: inline; font-weight: normal; margin-right: 15px; }
+        button { background: #007bff; color: white; padding: 12px 30px; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+    </style>
+</head>
+<body>
+    <h1>채용 지원서 (테스트용)</h1>
+    <form action="#" method="post">
+
+        <fieldset>
+            <legend>기본 정보</legend>
+            <div class="form-group">
+                <label for="name">성명</label>
+                <input type="text" id="name" name="name" placeholder="홍길동">
+            </div>
+            <div class="form-group">
+                <label for="email">이메일</label>
+                <input type="email" id="email" name="email" placeholder="example@email.com">
+            </div>
+            <div class="form-group">
+                <label for="phone">휴대폰 번호</label>
+                <input type="tel" id="phone" name="phone" placeholder="010-0000-0000">
+            </div>
+            <div class="form-group">
+                <label for="birthdate">생년월일</label>
+                <input type="text" id="birthdate" name="birthdate" placeholder="YYYY.MM.DD">
+            </div>
+            <div class="form-group">
+                <label for="address">주소</label>
+                <input type="text" id="address" name="address" placeholder="서울시 강남구">
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <legend>학력 사항</legend>
+            <div class="form-group">
+                <label for="school">학교명</label>
+                <input type="text" id="school" name="school" placeholder="한양대학교">
+            </div>
+            <div class="form-group">
+                <label for="major">전공</label>
+                <input type="text" id="major" name="major" placeholder="컴퓨터공학과">
+            </div>
+            <div class="form-group">
+                <label for="degree">학위</label>
+                <select id="degree" name="degree">
+                    <option value="">선택</option>
+                    <option value="highschool">고등학교</option>
+                    <option value="associate">전문대</option>
+                    <option value="bachelor">학사</option>
+                    <option value="master">석사</option>
+                    <option value="doctor">박사</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="grad_status">졸업 여부</label>
+                <select id="grad_status" name="grad_status">
+                    <option value="">선택</option>
+                    <option value="graduate">졸업</option>
+                    <option value="expected">졸업예정</option>
+                    <option value="leave">휴학</option>
+                    <option value="drop">중퇴</option>
+                </select>
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <legend>병역 사항</legend>
+            <div class="form-group">
+                <label for="military_status">병역 구분</label>
+                <select id="military_status" name="military_status">
+                    <option value="">선택</option>
+                    <option value="completed">군필</option>
+                    <option value="exempt">면제</option>
+                    <option value="unfulfilled">미필</option>
+                    <option value="na">해당없음</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="military_branch">군별</label>
+                <select id="military_branch" name="military_branch">
+                    <option value="">선택</option>
+                    <option value="army">육군</option>
+                    <option value="navy">해군</option>
+                    <option value="airforce">공군</option>
+                    <option value="marine">해병대</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="military_rank">계급</label>
+                <select id="military_rank" name="military_rank">
+                    <option value="">선택</option>
+                    <option value="private2">이등병</option>
+                    <option value="private1">일등병</option>
+                    <option value="corporal">상등병</option>
+                    <option value="sergeant">병장</option>
+                    <option value="staff_sergeant">하사</option>
+                    <option value="sergeant_first">중사</option>
+                    <option value="master_sergeant">상사</option>
+                    <option value="sergeant_major">원사</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="military_specialty">병과</label>
+                <input type="text" id="military_specialty" name="military_specialty" placeholder="통신">
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <legend>경력 사항</legend>
+            <div class="form-group">
+                <label for="company">회사명</label>
+                <input type="text" id="company" name="company" placeholder="ABC주식회사">
+            </div>
+            <div class="form-group">
+                <label for="role">직급/직책</label>
+                <input type="text" id="role" name="role" placeholder="대리">
+            </div>
+            <div class="form-group">
+                <label for="department">부서</label>
+                <input type="text" id="department" name="department" placeholder="개발팀">
+            </div>
+            <div class="form-group">
+                <label for="employment_type">고용 형태</label>
+                <select id="employment_type" name="employment_type">
+                    <option value="">선택</option>
+                    <option value="regular">정규직</option>
+                    <option value="contract">계약직</option>
+                    <option value="intern">인턴</option>
+                    <option value="freelance">프리랜스</option>
+                </select>
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <legend>기타 정보</legend>
+            <div class="form-group">
+                <label for="skills">보유 기술</label>
+                <input type="text" id="skills" name="skills" placeholder="Python, JavaScript, SQL">
+            </div>
+            <div class="form-group">
+                <label for="certifications">자격증</label>
+                <input type="text" id="certifications" name="certifications" placeholder="정보처리기사">
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <legend>자기소개</legend>
+            <div class="form-group">
+                <label for="self_intro">자기소개서 (성장과정, 지원동기, 장단점, 입사 후 포부)</label>
+                <textarea id="self_intro" name="self_intro" rows="8" placeholder="자기소개를 입력해주세요."></textarea>
+            </div>
+        </fieldset>
+
+        <div style="text-align: center; margin-top: 20px;">
+            <button type="submit">지원서 제출</button>
+        </div>
+    </form>
+</body>
+</html>

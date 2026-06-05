@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Agent</title>
+    <style>
+        body {
+            width: 450px;
+            height: 600px;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+        }
+        .header {
+            background-color: #4285f4;
+            color: white;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .header h1 {
+            font-size: 16px;
+            margin: 0;
+        }
+        .chat-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+            background-color: #f5f5f5;
+        }
+        .message {
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+        }
+        .message.user {
+            align-items: flex-end;
+        }
+        .message.agent {
+            align-items: flex-start;
+        }
+        .message-content {
+            max-width: 80%;
+            padding: 10px 15px;
+            border-radius: 15px;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+        .message.user .message-content {
+            background-color: #4285f4;
+            color: white;
+            border-bottom-right-radius: 5px;
+        }
+        .message.agent .message-content {
+            background-color: white;
+            color: #333;
+            border-bottom-left-radius: 5px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        .message-time {
+            font-size: 10px;
+            color: #999;
+            margin-top: 5px;
+        }
+        .input-container {
+            padding: 15px;
+            background-color: white;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            gap: 10px;
+        }
+        .input-container input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            font-size: 13px;
+            outline: none;
+        }
+        .input-container input:focus {
+            border-color: #4285f4;
+        }
+        .input-container button {
+            padding: 10px 20px;
+            background-color: #4285f4;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        .input-container button:hover {
+            background-color: #3367d6;
+        }
+        .input-container button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .typing-indicator {
+            display: none;
+            padding: 10px;
+            color: #666;
+            font-size: 12px;
+            font-style: italic;
+        }
+        .typing-indicator.active {
+            display: block;
+        }
+        .quick-actions {
+            padding: 10px 15px;
+            background-color: #f9f9f9;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .quick-action {
+            padding: 5px 12px;
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 15px;
+            font-size: 11px;
+            cursor: pointer;
+            color: #666;
+        }
+        .quick-action:hover {
+            background-color: #e8f0fe;
+            border-color: #4285f4;
+            color: #4285f4;
+        }
+        .resume-bar {
+            padding: 8px 15px;
+            background-color: #fff8e1;
+            border-top: 1px solid #ffe0a3;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: #7a5b00;
+        }
+        .resume-bar span {
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .resume-btn {
+            padding: 5px 10px;
+            background-color: #f4b400;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 11px;
+            cursor: pointer;
+        }
+        .resume-btn:hover { background-color: #e0a200; }
+        .resume-btn.secondary { background-color: #bbb; }
+        .resume-btn.secondary:hover { background-color: #999; }
+        .resume-btn:disabled { background-color: #ccc; cursor: not-allowed; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <span>🤖</span>
+        <h1>AI Agent</h1>
+    </div>
+    
+    <div class="chat-container" id="chatContainer">
+        <div class="message agent">
+            <div class="message-content">
+                안녕하세요! AI Agent입니다. 무엇을 도와드릴까요?
+                <br><br>
+                예시:
+                <br>• "Google로 이동해서 'AI' 검색해줘"
+                <br>• "이 페이지 지원할건데 PDF 기반으로 작성해줘"
+                <br>• "로그인 버튼 클릭해줘"
+            </div>
+            <div class="message-time">지금</div>
+        </div>
+    </div>
+    
+    <div class="resume-bar" id="resumeBar">
+        <span id="resumeStatus">📄 이력서 미등록</span>
+        <input type="file" id="resumeFile" accept="application/pdf" style="display:none">
+        <button id="resumeUploadBtn" class="resume-btn">이력서 PDF 업로드</button>
+        <button id="resumeClearBtn" class="resume-btn secondary" style="display:none">삭제</button>
+    </div>
+
+    <div class="quick-actions">
+        <button class="quick-action" data-action="현재 페이지 분석해줘">페이지 분석</button>
+        <button class="quick-action" data-action="이력서 기반으로 이 지원서 빈칸 작성해줘">지원서 작성</button>
+        <button class="quick-action" data-action="스크린샷 찍어줘">스크린샷</button>
+    </div>
+    
+    <div class="typing-indicator" id="typingIndicator">AI가 생각 중...</div>
+    
+    <div class="input-container">
+        <input type="text" id="messageInput" placeholder="메시지를 입력하세요...">
+        <button id="sendBtn">전송</button>
+    </div>
+    
+    <script src="popup.js"></script>
+</body>
+</html>

@@ -1,0 +1,88 @@
+{
+  "name": "강성탁",
+  "age": 32,
+  "email": "sug0256@naver.com",
+  "phone": "010-9998-7436",
+  "education": [
+    {
+      "institution": "중부대학교",
+      "degree": "대학교(4년)",
+      "major": "컴퓨터학과",
+      "start_date": "2012-03",
+      "end_date": "2018-08",
+      "gpa": "3.21 / 4.5"
+    },
+    {
+      "institution": "김포제일고등학교",
+      "degree": "고등학교",
+      "graduation_year": 2011
+    }
+  ],
+  "certifications": [
+    {
+      "name": "정보처리기사",
+      "date": "2019-11",
+      "issuing_organization": "한국산업인력공단"
+    }
+  ],
+  "experience": [
+    {
+      "company": "아롬정보기술",
+      "position": "대리",
+      "department": "클라우드사업본부",
+      "start_date": "2021-05",
+      "end_date": "현재",
+      "duration": "5년 1개월",
+      "responsibilities": [
+        "Java/Spring Boot 기반 백엔드 API 설계 및 아키텍처 현대화",
+        "레거시 코드 정제 및 쿼리 최적화로 API 응답 속도 30% 개선",
+        "Jenkins 기반 CI/CD 자동화 환경 구축 및 배포 운영",
+        "SaaS Network 인프라 자원 제어 로직 구현",
+        "Cloud Storage 및 커넥트허브 API 신규 개발",
+        "고객 요구사항 분석을 통한 서비스 프로세스 개선 및 운영"
+      ]
+    },
+    {
+      "company": "웹케시",
+      "position": "인턴",
+      "start_date": "2018-06",
+      "end_date": "2018-08",
+      "duration": "3개월",
+      "responsibilities": [
+        "자사 프로그램 간단한 DB 수정 및 서비스"
+      ]
+    }
+  ],
+  "skills": [
+    "JAVA",
+    "JPA",
+    "SQL",
+    "AWS",
+    "Spring Boot",
+    "네트워킹",
+    "API",
+    "OracleDB",
+    "MySQL"
+  ],
+  "projects": [
+    {
+      "name": "KT 클라우드 포털 유지보수 및 서비스 개선",
+      "start_date": "2021-05",
+      "end_date": "2023-01",
+      "role": "웹 서비스 개발 (프론트엔드, 백엔드 API)"
+    },
+    {
+      "name": "KT 클라우드 포털 차세대 시스템 마이그레이션",
+      "start_date": "2023-01",
+      "end_date": "2025-01",
+      "role": "백엔드 API 개발 및 아키텍처 설계"
+    },
+    {
+      "name": "클라우드 플랫폼 B2B 맞춤형 기능 개발",
+      "start_date": "2025-01",
+      "end_date": "현재",
+      "role": "백엔드 개발"
+    }
+  ],
+  "self_introduction": ""
+}

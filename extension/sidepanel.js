@@ -848,7 +848,7 @@ function pageStateCollector() {
     // 이전 태그 제거
     document.querySelectorAll('[' + ATTR + ']').forEach(el => el.removeAttribute(ATTR));
 
-    const selector = 'a, button, input, textarea, select, [role="button"], [role="link"], [onclick], [role="option"], [role="menuitem"], [role="menuitemcheckbox"], [role="gridcell"], [role="combobox"], [role="checkbox"], [role="radio"], [role="switch"], [role="tab"], [role="spinbutton"], [contenteditable="true"]';
+    const selector = 'a, button, input, textarea, select, [role="button"], [role="link"], [onclick], [role="option"], [role="menuitem"], [role="menuitemcheckbox"], [role="gridcell"], [role="combobox"], [role="checkbox"], [role="radio"], [role="switch"], [role="tab"], [role="spinbutton"], [contenteditable="true"], .ant-dropdown-trigger, .ant-picker, [tabindex="0"]';
     const candidates = Array.from(document.querySelectorAll(selector));
 
     function isVisible(el) {
@@ -902,18 +902,33 @@ function pageStateCollector() {
         return mainLabel;
     }
 
+    // NBSP 정규화 헬퍼 (ninehire 등에서 \u00A0 사용)
+    function normText(s) {
+        return (s || '').replace(/\u00A0/g, ' ').replace(/\s+/g, ' ').trim();
+    }
+
     // 입력 요소에 연결된 라벨 텍스트를 여러 방법으로 추정 (커스텀 폼 대응)
     function findFieldLabel(el) {
+        // 0. div.label[contenteditable="false"] 패턴 (ninehire/커스텀 React 폼)
+        let node = el.parentElement;
+        for (let d = 0; d < 8 && node; d++) {
+            const divLabel = node.querySelector(':scope > div.label[contenteditable="false"], :scope > div[class*="label"][contenteditable="false"]');
+            if (divLabel && !divLabel.contains(el)) {
+                const t = normText(divLabel.innerText);
+                if (t && t.length >= 2 && t.length <= 80) return t;
+            }
+            node = node.parentElement;
+        }
         // 1. label[for=id]
         if (el.id) {
             try {
                 const l = document.querySelector('label[for="' + (window.CSS && CSS.escape ? CSS.escape(el.id) : el.id) + '"]');
-                if (l && l.innerText.trim()) return l.innerText.trim();
+                if (l && l.innerText.trim()) return normText(l.innerText);
             } catch (_) {}
         }
         // 2. 감싸는 label
         const wrap = el.closest('label');
-        if (wrap && wrap.innerText.trim()) return wrap.innerText.trim();
+        if (wrap && wrap.innerText.trim()) return normText(wrap.innerText);
         // 3. aria-labelledby
         const lb = el.getAttribute('aria-labelledby');
         if (lb) {
@@ -1142,16 +1157,31 @@ function pageActionExecutor(action) {
         el.scrollIntoView({ block: 'center', behavior: 'instant' });
 
         if (action.action === 'click') {
+            // 커스텀 체크박스(styled-components/Ant) 호환:
+            // React 이벤트 위임은 event.target이 핸들러가 달린 내부 "박스"여야 발화.
+            // 래퍼(role=checkbox / class*=checkbox / tabindex)에 클릭하면 토글 안 되는 경우가 많아
+            // 내부 박스 요소를 타겟으로 전환.
+            let target = el;
+            const isCheckboxWrapper = el.getAttribute('role') === 'checkbox'
+                || /checkbox/i.test(el.className || '')
+                || (el.getAttribute('tabindex') === '0' && !el.querySelector('input') && el.children.length > 0);
+            if (isCheckboxWrapper) {
+                const innerBox = el.querySelector('[class*="BasicCheckbox"], [class*="heckbox"] > div')
+                    || el.firstElementChild;
+                if (innerBox) target = innerBox;
+            }
             // React / MUI / custom 위젯 호환: 전체 포인터/마우스 시퀀스 디스패치
-            const rect = el.getBoundingClientRect();
+            const rect = target.getBoundingClientRect();
             const x = rect.left + rect.width / 2;
             const y = rect.top + rect.height / 2;
             const getOpts = (type) => ({ bubbles: true, cancelable: true, clientX: x, clientY: y, pointerType: 'mouse' });
-            el.dispatchEvent(new PointerEvent('pointerdown', getOpts()));
-            el.dispatchEvent(new MouseEvent('mousedown', getOpts()));
-            el.dispatchEvent(new PointerEvent('pointerup', getOpts()));
-            el.dispatchEvent(new MouseEvent('mouseup', getOpts()));
-            el.click();
+            target.dispatchEvent(new PointerEvent('pointerover', getOpts()));
+            target.dispatchEvent(new PointerEvent('pointerenter', getOpts()));
+            target.dispatchEvent(new PointerEvent('pointerdown', getOpts()));
+            target.dispatchEvent(new MouseEvent('mousedown', getOpts()));
+            target.dispatchEvent(new PointerEvent('pointerup', getOpts()));
+            target.dispatchEvent(new MouseEvent('mouseup', getOpts()));
+            target.dispatchEvent(new MouseEvent('click', getOpts()));
             return { success: true };
         }
 
@@ -1191,6 +1221,61 @@ function pageActionExecutor(action) {
             const iso = `${year}-${month}-${day}`;
             const dot = `${year}.${month}.${day}`;
             const compact = `${year}${month}${day}`;
+
+            // 0. Ant Design DatePicker 감지 및 처리
+            const antPicker = el.closest('.ant-picker') || el.parentElement?.closest('.ant-picker');
+            if (antPicker || el.classList.contains('ant-picker-input') || (el.readOnly && el.placeholder && /날짜|선택/i.test(el.placeholder))) {
+                // 포인터 이벤트 시퀀스로 패널 열기
+                el.focus();
+                const rect = el.getBoundingClientRect();
+                const evtOpts = { bubbles: true, cancelable: true, view: window, clientX: rect.left + rect.width / 2, clientY: rect.top + rect.height / 2 };
+                ['pointerover','pointerenter','pointerdown','mousedown','pointerup','mouseup','click'].forEach(t => {
+                    const E = t.startsWith('pointer') ? PointerEvent : MouseEvent;
+                    el.dispatchEvent(new E(t, evtOpts));
+                });
+                // 비동기 캘린더 탐색
+                return new Promise(resolve => {
+                    setTimeout(async function() {
+                        const panel = document.querySelector('.ant-picker-dropdown:not(.ant-picker-dropdown-hidden)');
+                        if (!panel) {
+                            // fallback: native setter
+                            const proto2 = window.HTMLInputElement.prototype;
+                            const setter2 = Object.getOwnPropertyDescriptor(proto2, 'value').set;
+                            setter2.call(el, dot);
+                            el.dispatchEvent(new Event('input', { bubbles: true }));
+                            el.dispatchEvent(new Event('change', { bubbles: true }));
+                            resolve({ success: true, detail: `날짜 입력 (native fallback): ${dot}` });
+                            return;
+                        }
+                        try {
+                            // 연 패널 열기
+                            const yearBtn = panel.querySelector('.ant-picker-year-btn');
+                            if (yearBtn) yearBtn.click();
+                            await new Promise(r => setTimeout(r, 250));
+                            // 연도 탐색
+                            for (let g = 0; g < 30; g++) {
+                                const cells = Array.from(panel.querySelectorAll('.ant-picker-cell'));
+                                const yc = cells.find(c => (c.textContent || '').trim() === year);
+                                if (yc) { yc.click(); break; }
+                                const first = parseInt((cells[1] || cells[0])?.textContent, 10) || 2020;
+                                const nav = panel.querySelector(Number(year) < first ? '.ant-picker-header-super-prev-btn' : '.ant-picker-header-super-next-btn');
+                                if (nav) nav.click();
+                                await new Promise(r => setTimeout(r, 150));
+                            }
+                            await new Promise(r => setTimeout(r, 200));
+                            // 월 선택
+                            const mc = Array.from(panel.querySelectorAll('.ant-picker-cell'));
+                            const mCell = mc.find(c => (c.textContent || '').trim() === Number(month) + '월') || mc[Number(month) - 1];
+                            if (mCell) mCell.click();
+                            await new Promise(r => setTimeout(r, 200));
+                            // 일 선택
+                            const dc = panel.querySelector('.ant-picker-cell[title="' + iso + '"]');
+                            if (dc) { dc.click(); resolve({ success: true, detail: `날짜 입력 (Ant DatePicker): ${el.value || iso}` }); }
+                            else resolve({ success: false, error: `날짜 셀 ${iso} 없음` });
+                        } catch (e) { resolve({ success: false, error: e.message }); }
+                    }, 400);
+                });
+            }
 
             // 1. 동적 datepicker 활성화: click 먼저 (클래스 변경 트리거)
             el.click();
@@ -1287,9 +1372,38 @@ function pageActionExecutor(action) {
                 el.dispatchEvent(new Event('change', { bubbles: true }));
                 return { success: true };
             }
-            // 커스텀 드롭다운(div 기반): 우선 클릭으로 펼침
-            el.click();
-            return { success: true };
+            // Ant Design / 커스텀 드롭다운: 클릭 → 메뉴 항목 선택
+            const trigger = el.closest('.ant-dropdown-trigger') || el.querySelector('.ant-dropdown-trigger') || el;
+            trigger.click();
+            // 비동기로 메뉴 렌더링 대기 후 선택 (setTimeout 기반)
+            return new Promise(resolve => {
+                setTimeout(() => {
+                    const menuSelectors = [
+                        '.ant-dropdown:not(.ant-dropdown-hidden) .ant-dropdown-menu-item',
+                        '.ant-select-dropdown:not(.ant-select-dropdown-hidden) .ant-select-item',
+                        '[role="option"]', '[role="menuitem"]'
+                    ];
+                    let items = [];
+                    for (const sel of menuSelectors) {
+                        items = Array.from(document.querySelectorAll(sel));
+                        if (items.length > 0) break;
+                    }
+                    const normS = s => (s || '').replace(/\u00A0/g, ' ').replace(/\s+/g, ' ').trim().toLowerCase();
+                    const target = normS(want);
+                    const match = items.find(x => normS(x.textContent) === target)
+                        || items.find(x => normS(x.textContent).includes(target));
+                    if (match) {
+                        match.click();
+                        resolve({ success: true, detail: `선택: ${(match.textContent || '').trim()}` });
+                    } else if (items.length > 0) {
+                        // 정확한 매치 없으면 첫 번째 항목 선택하지 않고 실패 보고
+                        document.body.click();
+                        resolve({ success: false, error: `'${want}' 항목 없음 (${items.length}개 옵션 중)` });
+                    } else {
+                        resolve({ success: false, error: '드롭다운 메뉴가 열리지 않았습니다' });
+                    }
+                }, 350);
+            });
         }
 
         if (action.action === 'submit') {

@@ -911,8 +911,19 @@ function pageStateCollector() {
     function findFieldLabel(el) {
         // 0. div.label[contenteditable="false"] 패턴 (ninehire/커스텀 React 폼)
         let node = el.parentElement;
-        for (let d = 0; d < 8 && node; d++) {
-            const divLabel = node.querySelector(':scope > div.label[contenteditable="false"], :scope > div[class*="label"][contenteditable="false"]');
+        for (let d = 0; d < 10 && node; d++) {
+            // 0a. 직계 라벨 (가장 정확)
+            let divLabel = node.querySelector(':scope > div.label[contenteditable="false"], :scope > div[class*="label"][contenteditable="false"]');
+            // 0b. 래퍼로 감싸인 라벨 폴백: 라벨이 (제목+설명) 래퍼 안에 중첩돼
+            //     입력과 별도 서브트리에 있는 경우(예: ninehire 군별/계급/병과/학점) 직계 탐색이 실패함.
+            //     "필드 행"(입력 1~3개)으로 범위를 한정해 후손 라벨을 찾되, 폼 전체 컨테이너는 제외.
+            if (!divLabel) {
+                const fillCount = node.querySelectorAll('input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not([type="file"]), textarea, select').length;
+                if (fillCount <= 3) {
+                    const nested = node.querySelector('div.label[contenteditable="false"], div[class*="label"][contenteditable="false"]');
+                    if (nested && !nested.contains(el)) divLabel = nested;
+                }
+            }
             if (divLabel && !divLabel.contains(el)) {
                 const t = normText(divLabel.innerText);
                 if (t && t.length >= 2 && t.length <= 80) return t;
